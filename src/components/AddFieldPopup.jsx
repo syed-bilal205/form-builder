@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,64 +7,39 @@ import {
   InputLabel,
   Select,
   Chip,
-  FormControlLabel,
   TextField,
   Grid,
   MenuItem,
-  Switch,
 } from "@mui/material";
+import DatePicker from "@mui/lab/DatePicker";
+import { useDispatch, useSelector } from "react-redux";
+import { addAdditionalField } from "../redux/formDataSlice";
 
-const AddFieldPopup = ({ onClose, addFields }) => {
+const AddFieldPopup = ({ onClose }) => {
   const [tab, setTab] = useState("General");
-  const [generalField, setGeneralField] = useState({
-    fieldType: "",
-    fieldLabel: "",
-    name: "",
-    identifier: true,
-    tooltip: "Tooltip",
-    helpText: "Help Text",
-    placeholderText: "Placeholder Text",
-    customAlignment: "left",
-  });
-
-  useEffect(() => {
-    setGeneralField((prevGeneralField) => ({
-      ...prevGeneralField,
-      fieldLabel: getDefaultLabelForFieldType(
-        prevGeneralField.fieldType
-      ),
-    }));
-  }, [generalField.fieldType]);
+  const dispatch = useDispatch();
+  const generalField = useSelector((state) => state.formData);
 
   const handleClose = () => onClose();
 
   const handleTabChange = (newTab) => setTab(newTab);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === "checkbox" ? checked : value;
-    setGeneralField((prevGeneralField) => ({
-      ...prevGeneralField,
-      [name]: fieldValue,
-    }));
+    const { name, value } = e.target;
+
+    dispatch(addAdditionalField({ [name]: value }));
   };
 
-  const getDefaultLabelForFieldType = (fieldType) => {
-    switch (fieldType) {
-      case "text":
-        return "Text Label";
-      case "number":
-        return "Number Label";
-      case "email":
-        return "Email Label";
-      default:
-        return "Default Label";
-    }
+  const handleDateChange = (date) => {
+    dispatch(addAdditionalField({ date }));
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    addFields(generalField);
+    if (!generalField.fieldType || !generalField.fieldLabel) {
+      alert("Please Select Field.");
+      return;
+    }
     handleClose();
   };
 
@@ -110,7 +85,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
         ))}
       </Box>
 
-      <form onSubmit={onSubmit}>
+      <form>
         {tab === "General" && (
           <Box>
             <FormControl sx={{ m: 1, width: "100%" }}>
@@ -147,33 +122,18 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               />
             </FormControl>
 
-            <Grid container spacing={1} alignItems="center">
-              <Grid item xs={6}>
-                <FormControl sx={{ m: 1, width: "100%" }}>
-                  <InputLabel>Variable Name</InputLabel>
-                  <TextField
-                    name="name"
-                    value={generalField.name}
-                    onChange={handleChange}
-                    size="small"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      name="identifier"
-                      checked={generalField.identifier}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Identifier"
-                  sx={{ marginLeft: "auto" }}
+            <Grid item xs={6}>
+              <FormControl sx={{ m: 1, width: "100%" }}>
+                <InputLabel>Variable Name</InputLabel>
+                <TextField
+                  name="name"
+                  value={generalField.name}
+                  onChange={handleChange}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
                 />
-              </Grid>
+              </FormControl>
             </Grid>
 
             <Box
@@ -242,7 +202,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
             <FormControl sx={{ m: 1, width: "100%" }}>
               <TextField
                 name="placeholderText"
-                value={generalField.placeholderText}
+                value={generalField.advancedField}
                 onChange={handleChange}
                 label="Add Options"
                 variant="outlined"
@@ -265,26 +225,12 @@ const AddFieldPopup = ({ onClose, addFields }) => {
         {tab === "Validation" && (
           <Box>
             <FormControl sx={{ m: 1, width: "100%" }}>
-              <InputLabel htmlFor="date-format-select">
-                Date Format
-              </InputLabel>
-              <Select
-                id="date-format-select"
-                name="fieldType"
-                value={generalField.fieldType}
-                onChange={handleChange}
-                label="Choose Date Format"
-                variant="outlined">
-                <MenuItem value="MM/dd/yyyy">
-                  <Typography>MM/dd/yyyy</Typography>
-                </MenuItem>
-                <MenuItem value="dd/MM/yyyy">
-                  <Typography>dd/MM/yyyy</Typography>
-                </MenuItem>
-                <MenuItem value="yyyy-MM-dd">
-                  <Typography>yyyy-MM-dd</Typography>
-                </MenuItem>
-              </Select>
+              <DatePicker
+                label="Choose Date"
+                value={generalField.date}
+                onChange={handleDateChange}
+                renderInput={(params) => <TextField {...params} />}
+              />
             </FormControl>
           </Box>
         )}
@@ -301,7 +247,10 @@ const AddFieldPopup = ({ onClose, addFields }) => {
             sx={{ backgroundColor: "#F1F5F9", color: "#000" }}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
+          <Button
+            type="submit"
+            onClick={onSubmit}
+            variant="contained">
             Save
           </Button>
         </Box>

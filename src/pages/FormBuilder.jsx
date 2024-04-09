@@ -15,58 +15,13 @@ import Branching from "../assets/branching.png";
 import Icon from "../assets/Icon.png";
 import MyButton from "../components/Button";
 import AddFieldPopup from "../components/AddFieldPopup";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
+import { useSelector } from "react-redux";
 
 const FormBuilder = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    dateOfBirth: "",
-    option: "",
-    gender: "",
-    ethnicity: "",
-    additionalFields: [],
-  });
+  const formData = useSelector((state) => state.formData);
+  const additionalFields = formData.additionalFields;
   const [openPopup, setOpenPopup] = useState(false);
-
-  const onSubmit = () => {
-    console.log("Submitted data:", formData);
-
-    axios
-      .post(
-        "https://staging-edc-api1.azurewebsites.net/api/v1/form-fields/",
-        formData
-      )
-      .then((res) => {
-        console.log(res);
-        setFormData({
-          ...formData,
-          name: "",
-          dateOfBirth: "",
-          option: "",
-          gender: "",
-          ethnicity: "",
-          additionalFields: [],
-        });
-        navigate("/subjects");
-      })
-      .catch((error) => console.log(error));
-
-    handleClosePopup();
-  };
-
-  const addFields = (fieldData) => {
-    if (fieldData.fieldLabel) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        additionalFields: [
-          ...prevFormData.additionalFields,
-          fieldData,
-        ],
-      }));
-    }
-  };
 
   const handlePopupOpen = () => {
     setOpenPopup(true);
@@ -122,7 +77,7 @@ const FormBuilder = () => {
             Section 1
           </Typography>
 
-          {formData.additionalFields.map((field, index) => (
+          {additionalFields.map((field, index) => (
             <Box
               key={index}
               sx={{
@@ -139,7 +94,7 @@ const FormBuilder = () => {
                 <Typography
                   variant="body1"
                   sx={{ color: "#2A4376", fontWeight: 600 }}>
-                  {index + 2}. {field.fieldLabel}
+                  {index + 1}. {field.fieldType}
                 </Typography>
                 <TextField
                   sx={{
@@ -153,13 +108,9 @@ const FormBuilder = () => {
             </Box>
           ))}
         </Box>
-
         <MyButton onClick={handlePopupOpen} />
         <Dialog open={openPopup} onClose={handleClosePopup}>
-          <AddFieldPopup
-            onClose={handleClosePopup}
-            addFields={addFields}
-          />
+          <AddFieldPopup onClose={handleClosePopup} />
         </Dialog>
       </Box>
     </Box>
