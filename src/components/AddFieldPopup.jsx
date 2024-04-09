@@ -1,61 +1,73 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   Button,
   FormControl,
   InputLabel,
-  FormControlLabel,
   Select,
+  Chip,
+  FormControlLabel,
   TextField,
   Grid,
-  Chip,
   MenuItem,
   Switch,
 } from "@mui/material";
 
 const AddFieldPopup = ({ onClose, addFields }) => {
   const [tab, setTab] = useState("General");
-  const [formData, setFormData] = useState({
+  const [generalField, setGeneralField] = useState({
     fieldType: "",
     fieldLabel: "",
     name: "",
-    required: false,
-    identifier: false,
-    placeholderText: "",
-    tooltip: "",
-    helpText: "",
-    customAlignment: "",
+    identifier: true,
+    tooltip: "Tooltip",
+    helpText: "Help Text",
+    placeholderText: "Placeholder Text",
+    customAlignment: "left",
   });
 
-  const handleClose = () => {
-    onClose();
-  };
+  useEffect(() => {
+    setGeneralField((prevGeneralField) => ({
+      ...prevGeneralField,
+      fieldLabel: getDefaultLabelForFieldType(
+        prevGeneralField.fieldType
+      ),
+    }));
+  }, [generalField.fieldType]);
 
-  const handleTabChange = (newTab) => {
-    setTab(newTab);
-  };
+  const handleClose = () => onClose();
+
+  const handleTabChange = (newTab) => setTab(newTab);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const fieldValue = type === "checkbox" ? checked : value;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setGeneralField((prevGeneralField) => ({
+      ...prevGeneralField,
       [name]: fieldValue,
     }));
   };
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: fieldValue,
-    }));
+  const getDefaultLabelForFieldType = (fieldType) => {
+    switch (fieldType) {
+      case "text":
+        return "Text Label";
+      case "number":
+        return "Number Label";
+      case "email":
+        return "Email Label";
+      default:
+        return "Default Label";
+    }
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    addFields(formData);
+    addFields(generalField);
     handleClose();
   };
+
   return (
     <Box
       sx={{
@@ -65,7 +77,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
         padding: "10px",
         backgroundColor: "#FFFF",
         maxWidth: "90%",
-        width: "800px",
+        width: "900px",
         margin: "auto",
       }}>
       <Box
@@ -83,52 +95,22 @@ const AddFieldPopup = ({ onClose, addFields }) => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-        <Button
-          sx={{
-            backgroundColor:
-              tab === "General" ? "#0E6ACE" : "#DDDDDD",
-            color: tab === "General" ? "#FFFF" : "#000000",
-            "&:hover": {
+      <Box sx={{ display: "flex", gap: 0.5 }}>
+        {["General", "Advance", "Validation"].map((tabName) => (
+          <Button
+            key={tabName}
+            sx={{
               backgroundColor:
-                tab === "General" ? "#0E6ACE" : "#DDDDDD",
-            },
-          }}
-          onClick={() => handleTabChange("General")}>
-          General
-        </Button>
-
-        <Button
-          sx={{
-            backgroundColor:
-              tab === "Advance" ? "#0E6ACE" : "#DDDDDD",
-            color: tab === "Advance" ? "#FFFF" : "#000000",
-            "&:hover": {
-              backgroundColor:
-                tab === "Advance" ? "#0E6ACE" : "#DDDDDD",
-            },
-          }}
-          onClick={() => handleTabChange("Advance")}>
-          Advance
-        </Button>
-
-        <Button
-          sx={{
-            backgroundColor:
-              tab === "Validation" ? "#0E6ACE" : "#DDDDDD",
-            color: tab === "Validation" ? "#FFFF" : "#000000",
-            "&:hover": {
-              backgroundColor:
-                tab === "Validation" ? "#0E6ACE" : "#DDDDDD",
-            },
-          }}
-          onClick={() => handleTabChange("Validation")}>
-          Validation
-        </Button>
+                tab === tabName ? "#0E6ACE" : "#F1F5F9",
+              color: tab === tabName ? "#FFF" : "#94A3B8",
+            }}
+            onClick={() => handleTabChange(tabName)}>
+            {tabName}
+          </Button>
+        ))}
       </Box>
 
       <form onSubmit={onSubmit}>
-        {/* Content of the selected tab */}
         {tab === "General" && (
           <Box>
             <FormControl sx={{ m: 1, width: "100%" }}>
@@ -136,7 +118,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <Select
                 id="fieldType"
                 name="fieldType"
-                value={formData.fieldType}
+                value={generalField.fieldType}
                 onChange={handleChange}
                 variant="outlined"
                 fullWidth>
@@ -156,7 +138,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <TextField
                 id="fieldLabel"
                 name="fieldLabel"
-                value={formData.fieldLabel}
+                value={generalField.fieldLabel}
                 onChange={handleChange}
                 variant="outlined"
                 fullWidth
@@ -171,7 +153,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
                   <InputLabel>Variable Name</InputLabel>
                   <TextField
                     name="name"
-                    value={formData.name}
+                    value={generalField.name}
                     onChange={handleChange}
                     size="small"
                     variant="outlined"
@@ -184,7 +166,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
                   control={
                     <Switch
                       name="identifier"
-                      checked={formData.identifier}
+                      checked={generalField.identifier}
                       onChange={handleChange}
                     />
                   }
@@ -202,7 +184,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="tooltip"
-                  value={formData.tooltip}
+                  value={generalField.tooltip}
                   onChange={handleChange}
                   label="Tooltip"
                   variant="outlined"
@@ -214,7 +196,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="helpText"
-                  value={formData.helpText}
+                  value={generalField.helpText}
                   onChange={handleChange}
                   label="Help Text"
                   variant="outlined"
@@ -231,7 +213,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="placeholderText"
-                  value={formData.placeholderText}
+                  value={generalField.placeholderText}
                   onChange={handleChange}
                   label="Placeholder Text"
                   variant="outlined"
@@ -243,7 +225,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="customAlignment"
-                  value={formData.customAlignment}
+                  value={generalField.customAlignment}
                   onChange={handleChange}
                   label="Custom Alignment"
                   variant="outlined"
@@ -260,11 +242,11 @@ const AddFieldPopup = ({ onClose, addFields }) => {
             <FormControl sx={{ m: 1, width: "100%" }}>
               <TextField
                 name="placeholderText"
-                value={formData.placeholderText}
+                value={generalField.placeholderText}
                 onChange={handleChange}
                 label="Add Options"
                 variant="outlined"
-                placeholder="Enter Placeholder Text"
+                fullWidth
               />
             </FormControl>
             <Chip
@@ -289,7 +271,7 @@ const AddFieldPopup = ({ onClose, addFields }) => {
               <Select
                 id="date-format-select"
                 name="fieldType"
-                value={formData.fieldType}
+                value={generalField.fieldType}
                 onChange={handleChange}
                 label="Choose Date Format"
                 variant="outlined">
