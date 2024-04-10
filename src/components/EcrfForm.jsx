@@ -81,7 +81,6 @@ const EcrfForm = () => {
           <TableRow>
             <TableCell
               sx={{
-                color: "#FFFFFF",
                 border: "1px solid #FFFFFF",
                 fontWeight: "bold",
               }}>
@@ -90,7 +89,6 @@ const EcrfForm = () => {
             <TableCell
               align="center"
               sx={{
-                color: "#FFFFFF",
                 border: "1px solid #FFFFFF",
                 fontWeight: "bold",
               }}>
@@ -99,16 +97,14 @@ const EcrfForm = () => {
             <TableCell
               align="center"
               sx={{
-                color: "#FFFFFF",
                 border: "1px solid #FFFFFF",
                 fontWeight: "bold",
               }}>
               Enabled as Survey
             </TableCell>
             <TableCell
-              align="center"
+              align="right"
               sx={{
-                color: "#FFFFFF",
                 border: "1px solid #FFFFFF",
                 fontWeight: "bold",
               }}>
@@ -149,8 +145,8 @@ const EcrfForm = () => {
                 <Select
                   size="small"
                   value={selectedActions[index]}
-                  style={{
-                    backgroundColor: "#ffff",
+                  sx={{
+                    backgroundColor: "#FFFF",
                     width: "100%",
                     color: "#94A3B8",
                   }}

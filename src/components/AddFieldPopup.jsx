@@ -11,12 +11,12 @@ import {
   Grid,
   MenuItem,
 } from "@mui/material";
-import DatePicker from "@mui/lab/DatePicker";
 import { useDispatch, useSelector } from "react-redux";
 import { addAdditionalField } from "../redux/formDataSlice";
-
+import PropTypes from "prop-types";
 const AddFieldPopup = ({ onClose }) => {
   const [tab, setTab] = useState("General");
+  const [addedFields, setAddedFields] = useState({});
   const dispatch = useDispatch();
   const generalField = useSelector((state) => state.formData);
 
@@ -24,22 +24,45 @@ const AddFieldPopup = ({ onClose }) => {
 
   const handleTabChange = (newTab) => setTab(newTab);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleAddField = (fieldName, fieldValue) => {
+    let labelValue;
 
-    dispatch(addAdditionalField({ [name]: value }));
-  };
+    switch (fieldName) {
+      case "fieldLabel":
+        labelValue = fieldValue;
+        break;
+      case "fieldType":
+        labelValue =
+          fieldValue === "text" ? "Text Field" : "Date Field";
+        break;
+      case "dateFormat":
+        labelValue = fieldValue;
+        break;
+      case "chip1":
+      case "chip2":
+        setAddedFields((prevFields) => ({
+          ...prevFields,
+          [fieldName]: fieldValue,
+        }));
+        return; // Exit early
+      default:
+        break;
+    }
 
-  const handleDateChange = (date) => {
-    dispatch(addAdditionalField({ date }));
+    setAddedFields((prevFields) => ({
+      ...prevFields,
+      [fieldName]: fieldValue,
+      label: labelValue,
+    }));
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!generalField.fieldType || !generalField.fieldLabel) {
-      alert("Please Select Field.");
-      return;
-    }
+    const fieldsWithLabel = {
+      ...addedFields,
+      label: addedFields.fieldLabel,
+    };
+    dispatch(addAdditionalField(fieldsWithLabel));
     handleClose();
   };
 
@@ -93,8 +116,10 @@ const AddFieldPopup = ({ onClose }) => {
               <Select
                 id="fieldType"
                 name="fieldType"
-                value={generalField.fieldType}
-                onChange={handleChange}
+                value={generalField.fieldType || ""}
+                onChange={(e) =>
+                  handleAddField("fieldType", e.target.value)
+                }
                 variant="outlined"
                 fullWidth>
                 <MenuItem value="">
@@ -111,14 +136,13 @@ const AddFieldPopup = ({ onClose }) => {
                 Field Label
               </InputLabel>
               <TextField
-                id="fieldLabel"
-                name="fieldLabel"
-                value={generalField.fieldLabel}
-                onChange={handleChange}
                 variant="outlined"
                 fullWidth
                 multiline
                 rows={2}
+                onClick={() =>
+                  handleAddField("fieldLabel", "Field Label")
+                }
               />
             </FormControl>
 
@@ -126,12 +150,12 @@ const AddFieldPopup = ({ onClose }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <InputLabel>Variable Name</InputLabel>
                 <TextField
-                  name="name"
-                  value={generalField.name}
-                  onChange={handleChange}
                   size="small"
                   variant="outlined"
                   fullWidth
+                  onClick={() =>
+                    handleAddField("fieldLabel", "Variable Name")
+                  }
                 />
               </FormControl>
             </Grid>
@@ -144,24 +168,25 @@ const AddFieldPopup = ({ onClose }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="tooltip"
-                  value={generalField.tooltip}
-                  onChange={handleChange}
                   label="Tooltip"
                   variant="outlined"
                   fullWidth
                   placeholder="Enter Tooltip"
+                  onClick={() =>
+                    handleAddField("fieldLabel", "Tooltip")
+                  }
                 />
               </FormControl>
 
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="helpText"
-                  value={generalField.helpText}
-                  onChange={handleChange}
                   label="Help Text"
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter Help Text"
+                  onClick={() =>
+                    handleAddField("fieldLabel", "Help Text")
+                  }
                 />
               </FormControl>
             </Box>
@@ -173,24 +198,24 @@ const AddFieldPopup = ({ onClose }) => {
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="placeholderText"
-                  value={generalField.placeholderText}
-                  onChange={handleChange}
                   label="Placeholder Text"
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter Placeholder Text"
+                  onClick={() =>
+                    handleAddField("fieldLabel", "Placeholder Text")
+                  }
                 />
               </FormControl>
 
               <FormControl sx={{ m: 1, width: "100%" }}>
                 <TextField
                   name="customAlignment"
-                  value={generalField.customAlignment}
-                  onChange={handleChange}
                   label="Custom Alignment"
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter Custom Alignment"
+                  onClick={() =>
+                    handleAddField("fieldLabel", "Custom Alignment")
+                  }
                 />
               </FormControl>
             </Box>
@@ -202,22 +227,29 @@ const AddFieldPopup = ({ onClose }) => {
             <FormControl sx={{ m: 1, width: "100%" }}>
               <TextField
                 name="placeholderText"
-                value={generalField.advancedField}
-                onChange={handleChange}
                 label="Add Options"
                 variant="outlined"
                 fullWidth
+                onClick={() =>
+                  handleAddField("fieldLabel", "Add Options")
+                }
               />
             </FormControl>
             <Chip
-              sx={{ bgcolor: "primary.main", color: "white" }}
+              sx={{ backgroundColor: "primary.main", color: "white" }}
               label="Deletable"
+              onClick={() => {
+                handleAddField("chip1", "Deletable");
+              }}
               onDelete={() => {}}
             />
 
             <Chip
-              sx={{ bgcolor: "primary.main", color: "white" }}
+              sx={{ backgroundColor: "primary.main", color: "white" }}
               label="Deletable"
+              onClick={() => {
+                handleAddField("chip2", "Deletable");
+              }}
               onDelete={() => {}}
             />
           </Box>
@@ -225,12 +257,25 @@ const AddFieldPopup = ({ onClose }) => {
         {tab === "Validation" && (
           <Box>
             <FormControl sx={{ m: 1, width: "100%" }}>
-              <DatePicker
-                label="Choose Date"
-                value={generalField.date}
-                onChange={handleDateChange}
-                renderInput={(params) => <TextField {...params} />}
-              />
+              <InputLabel id="date-format-label">
+                Date Format
+              </InputLabel>
+              <Select
+                labelId="date-format-label"
+                id="date-format"
+                value={addedFields.dateFormat || ""}
+                onChange={(e) =>
+                  handleAddField("dateFormat", e.target.value)
+                }
+                variant="outlined"
+                fullWidth>
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value="dd/MM/yyyy">DD/MM/YYYY</MenuItem>
+                <MenuItem value="MM/dd/yyyy">MM/DD/YYYY</MenuItem>
+                <MenuItem value="yyyy-MM-dd">YYYY-MM-DD</MenuItem>
+              </Select>
             </FormControl>
           </Box>
         )}
@@ -257,6 +302,10 @@ const AddFieldPopup = ({ onClose }) => {
       </form>
     </Box>
   );
+};
+
+AddFieldPopup.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default AddFieldPopup;

@@ -11,7 +11,7 @@ const BreadCrumbs = () => {
     <Breadcrumbs
       aria-label="breadcrumb"
       separator=">"
-      style={{ padding: "0.5rem 14rem", textDecoration: "none" }}>
+      style={{ padding: "0.5rem 0", textDecoration: "none" }}>
       <MuiLink
         component={Link}
         to="/eCRF"

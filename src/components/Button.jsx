@@ -15,10 +15,10 @@ const DashedButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-function MyButton({ onClick }) {
+function MyButton({ onClick, title }) {
   return (
     <DashedButton onClick={onClick} variant="contained">
-      Add Field
+      {title}
     </DashedButton>
   );
 }

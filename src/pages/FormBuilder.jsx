@@ -7,21 +7,26 @@ import {
   TextField,
   Dialog,
 } from "@mui/material";
-import Eye from "../assets/Vector.png";
+import Eye from "../assets/eye.png";
 import Delete from "../assets/delete.png";
 import Copy from "../assets/copy.png";
 import Edit from "../assets/edit.png";
 import Branching from "../assets/branching.png";
-import Icon from "../assets/Icon.png";
+import Icon from "../assets/add.png";
 import MyButton from "../components/Button";
 import AddFieldPopup from "../components/AddFieldPopup";
-
-import { useSelector } from "react-redux";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { clearFormData } from "../redux/formDataSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 const FormBuilder = () => {
-  const formData = useSelector((state) => state.formData);
-  const additionalFields = formData.additionalFields;
+  const formData = useSelector((state) => state.formData) || {};
+  const additionalFields = formData.additionalFields || [];
   const [openPopup, setOpenPopup] = useState(false);
+  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handlePopupOpen = () => {
     setOpenPopup(true);
@@ -29,6 +34,71 @@ const FormBuilder = () => {
 
   const handleClosePopup = () => {
     setOpenPopup(false);
+  };
+
+  const formId = 3;
+
+  const handleFormSubmit = async () => {
+    try {
+      const requiredFields = ["type"];
+      const formDataCopy = { ...formData, form: formId };
+
+      const existingPositions = formData.additionalFields.map(
+        (field) => field.position
+      );
+
+      let newPosition = 1;
+      while (existingPositions.includes(newPosition)) {
+        newPosition++;
+      }
+
+      formDataCopy.position = parseInt(newPosition);
+
+      if (!formDataCopy.type) {
+        formDataCopy.type = "text";
+      }
+
+      for (const field of requiredFields) {
+        if (!(field in formDataCopy)) {
+          throw new Error(`Missing value for ${field}`);
+        }
+      }
+
+      if (!Number.isInteger(formDataCopy.position)) {
+        throw new Error("Position must be an integer.");
+      }
+
+      const validTypes = ["text", "select", "checkbox"];
+      if (!validTypes.includes(formDataCopy.type)) {
+        throw new Error("Invalid type.");
+      }
+
+      if (!formDataCopy.label) {
+        formDataCopy.label = "Default Label";
+      }
+
+      formDataCopy.color = {
+        label: "color",
+        type: "select",
+        options: ["red", "yellow", "green"],
+        required: true,
+        form: formId,
+      };
+
+      const response = await axios.post(
+        "https://staging-edc-api1.azurewebsites.net/api/v1/form-fields/",
+        formDataCopy
+      );
+
+      console.log("Form submitted successfully:", response.data);
+      setError(null);
+      dispatch(clearFormData());
+      handleClosePopup();
+      navigate("/Subjects");
+    } catch (error) {
+      setError("An error occurred while submitting the form.");
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -73,7 +143,7 @@ const FormBuilder = () => {
           <Typography
             variant="h6"
             sx={{ color: "#2A4376", fontWeight: 600 }}>
-            <img src={Icon} alt="" />
+            <img src={Icon} alt="" style={{ paddingBottom: "8px" }} />
             Section 1
           </Typography>
 
@@ -94,7 +164,12 @@ const FormBuilder = () => {
                 <Typography
                   variant="body1"
                   sx={{ color: "#2A4376", fontWeight: 600 }}>
-                  {index + 1}. {field.fieldType}
+                  {index + 1}.{" "}
+                  {field.fieldLabel ||
+                    field.fieldType ||
+                    field.dateFormat ||
+                    field.chip1 ||
+                    field.chip2}
                 </Typography>
                 <TextField
                   sx={{
@@ -108,10 +183,16 @@ const FormBuilder = () => {
             </Box>
           ))}
         </Box>
-        <MyButton onClick={handlePopupOpen} />
+        <MyButton onClick={handlePopupOpen} title={"Add Field"} />
         <Dialog open={openPopup} onClose={handleClosePopup}>
           <AddFieldPopup onClose={handleClosePopup} />
         </Dialog>
+        <MyButton onClick={handleFormSubmit} title={"Submit"} />
+        {error && (
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

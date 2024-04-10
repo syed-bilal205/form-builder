@@ -1,5 +1,16 @@
-import { AppBar, Toolbar, Typography, Box } from "@mui/material";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Container,
+} from "@mui/material";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Ecrf from "./pages/Ecrf";
 import FormBuilder from "./pages/FormBuilder";
 import Subjects from "./pages/Subjects";
@@ -12,38 +23,38 @@ const App = () => {
   return (
     <BrowserRouter>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar
-          position="sticky"
-          width="100%"
-          sx={{
-            backgroundColor: "#2A4376",
-            padding: "0 2rem",
-          }}>
-          <Toolbar
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-            <Typography>
-              <img src={Logo} alt="Logo" width={"90px"} />
-            </Typography>
-            <Toolbar sx={{ display: "flex", gap: 2 }}>
-              <img src={Noti} alt="Notification" width={"28px"} />
-              <img src={Avatar} alt="Avatar" width={"28px"} />
+        <AppBar position="sticky" sx={{ backgroundColor: "#2A4376" }}>
+          <Container maxWidth="lg">
+            <Toolbar
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0 1rem",
+              }}>
+              <Typography>
+                <img src={Logo} alt="Logo" width={90} />
+              </Typography>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <img src={Noti} alt="Notification" width={28} />
+                <img src={Avatar} alt="Avatar" width={28} />
+              </Box>
             </Toolbar>
-          </Toolbar>
+          </Container>
         </AppBar>
-        <Box sx={{ mt: 5 }}>
-          <BreadCrumbs />
-        </Box>
-        <Box sx={{ mt: 3, padding: "0 14rem" }}>
-          <Routes>
-            <Route path="/eCRF" element={<Ecrf />} />
-            <Route path="/Form-Builder" element={<FormBuilder />} />
-            <Route path="/Subjects" element={<Subjects />} />
-          </Routes>
-        </Box>
+        <Container maxWidth="md">
+          <Box sx={{ mt: 5 }}>
+            <BreadCrumbs />
+          </Box>
+          <Box sx={{ mt: 3 }}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/eCRF" />} />
+              <Route path="/eCRF" element={<Ecrf />} />
+              <Route path="/Form-Builder" element={<FormBuilder />} />
+              <Route path="/Subjects" element={<Subjects />} />
+            </Routes>
+          </Box>
+        </Container>
       </Box>
     </BrowserRouter>
   );

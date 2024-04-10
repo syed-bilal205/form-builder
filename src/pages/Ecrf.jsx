@@ -18,7 +18,7 @@ const Ecrf = () => {
   };
 
   return (
-    <Box sx={{ padding: "20px" }}>
+    <Box>
       <Typography
         variant="h2"
         sx={{ color: "#0F172A", fontSize: 24, fontWeight: 600 }}>
@@ -57,11 +57,16 @@ const Ecrf = () => {
           item
           xs={12}
           md={6}
-          sx={{ display: "flex", justifyContent: "flex-end" }}>
+          sx={{
+            display: {
+              xs: "flex",
+              marginTop: 1,
+            },
+          }}>
           <Button
             variant="contained"
             onClick={handleCreateForm}
-            sx={{ padding: "6px 8px" }}>
+            sx={{ padding: "6px 6px", width: "100%" }}>
             New Form
           </Button>
         </Grid>
