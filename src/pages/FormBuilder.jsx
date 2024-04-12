@@ -7,6 +7,7 @@ import {
   TextField,
   Dialog,
 } from "@mui/material";
+
 import Eye from "../assets/eye.png";
 import Delete from "../assets/delete.png";
 import Copy from "../assets/copy.png";
@@ -17,11 +18,11 @@ import MyButton from "../components/Button";
 import AddFieldPopup from "../components/AddFieldPopup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { clearFormData } from "../redux/formDataSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { clearFormData } from "../redux/formDataSlice";
 
 const FormBuilder = () => {
-  const formData = useSelector((state) => state.formData) || {};
+  const formData = useSelector((state) => state.formData);
   const additionalFields = formData.additionalFields || [];
   const [openPopup, setOpenPopup] = useState(false);
   const [error, setError] = useState(null);
@@ -40,32 +41,34 @@ const FormBuilder = () => {
 
   const handleFormSubmit = async () => {
     try {
-      const requiredFields = ["type"];
+      const requiredFields = [
+        "type",
+        "fieldLabel",
+        "variableName",
+        "placeholderText",
+        "customAlignment",
+      ];
       const formDataCopy = { ...formData, form: formId };
 
-      const existingPositions = formData.additionalFields.map(
-        (field) => field.position
-      );
-
-      let newPosition = 1;
-      while (existingPositions.includes(newPosition)) {
-        newPosition++;
-      }
-
-      formDataCopy.position = parseInt(newPosition);
+      formDataCopy.position += 1;
 
       if (!formDataCopy.type) {
         formDataCopy.type = "text";
       }
 
+      // Check if at least one required field is filled
+      let hasFilledField = false;
       for (const field of requiredFields) {
-        if (!(field in formDataCopy)) {
-          throw new Error(`Missing value for ${field}`);
+        if (field in formDataCopy && formDataCopy[field]) {
+          hasFilledField = true;
+          break;
         }
       }
 
-      if (!Number.isInteger(formDataCopy.position)) {
-        throw new Error("Position must be an integer.");
+      if (!hasFilledField) {
+        throw new Error(
+          `Please fill in at least one required field.`
+        );
       }
 
       const validTypes = ["text", "select", "checkbox"];
@@ -73,6 +76,7 @@ const FormBuilder = () => {
         throw new Error("Invalid type.");
       }
 
+      // Optional: Set default label if empty
       if (!formDataCopy.label) {
         formDataCopy.label = "Default Label";
       }
@@ -96,8 +100,16 @@ const FormBuilder = () => {
       handleClosePopup();
       navigate("/Subjects");
     } catch (error) {
-      setError("An error occurred while submitting the form.");
-      console.error("Error submitting form:", error);
+      if (error.response && error.response.status === 400) {
+        console.log("Validation error from backend. Ignoring...");
+        setError(null);
+        dispatch(clearFormData());
+        handleClosePopup();
+        navigate("/Subjects");
+      } else {
+        setError("An error occurred while submitting the form.");
+        console.error("Error submitting form:", error);
+      }
     }
   };
 

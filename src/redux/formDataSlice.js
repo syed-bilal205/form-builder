@@ -1,31 +1,36 @@
+// formDataSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const formDataSlice = createSlice({
   name: "formData",
   initialState: {
-    fieldType: "",
-    fieldLabel: "",
     additionalFields: [],
   },
   reducers: {
-    setFormData: (state, action) => {
-      return { ...state, ...action.payload };
-    },
     addAdditionalField: (state, action) => {
-      state.additionalFields.push(action.payload);
+      // If the action payload doesn't have an 'id', generate a unique one
+      const addedField = {
+        id: action.payload.id || Date.now(), // Add a unique identifier if not provided
+        ...action.payload,
+      };
+      state.additionalFields.push(addedField);
     },
     clearFormData: (state) => {
-      return {
-        ...state,
-        fieldType: "",
-        fieldLabel: "",
-        additionalFields: [],
-      };
+      state.additionalFields = [];
+    },
+    updateDataForm: (state, action) => {
+      const updatedField = action.payload;
+      state.additionalFields = state.additionalFields.map((field) => {
+        if (field.id === updatedField.id) {
+          return { ...field, ...updatedField };
+        }
+        return field;
+      });
     },
   },
 });
 
-export const { setFormData, addAdditionalField, clearFormData } =
+export const { addAdditionalField, updateDataForm, clearFormData } =
   formDataSlice.actions;
 
 export default formDataSlice.reducer;

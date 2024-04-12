@@ -6,64 +6,39 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Chip,
   TextField,
-  Grid,
+  Chip,
   MenuItem,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { addAdditionalField } from "../redux/formDataSlice";
 import PropTypes from "prop-types";
+
 const AddFieldPopup = ({ onClose }) => {
   const [tab, setTab] = useState("General");
-  const [addedFields, setAddedFields] = useState({});
   const dispatch = useDispatch();
   const generalField = useSelector((state) => state.formData);
 
-  const handleClose = () => onClose();
-
   const handleTabChange = (newTab) => setTab(newTab);
 
-  const handleAddField = (fieldName, fieldValue) => {
-    let labelValue;
-
-    switch (fieldName) {
-      case "fieldLabel":
-        labelValue = fieldValue;
-        break;
-      case "fieldType":
-        labelValue =
-          fieldValue === "text" ? "Text Field" : "Date Field";
-        break;
-      case "dateFormat":
-        labelValue = fieldValue;
-        break;
-      case "chip1":
-      case "chip2":
-        setAddedFields((prevFields) => ({
-          ...prevFields,
-          [fieldName]: fieldValue,
-        }));
-        return; // Exit early
-      default:
-        break;
+  const handleAddField = (fieldName, fieldValue, value) => {
+    let labelValue = fieldValue;
+    if (fieldName === "fieldType") {
+      labelValue =
+        fieldValue === "text" ? "Text Field" : "Date Field";
     }
-
-    setAddedFields((prevFields) => ({
-      ...prevFields,
+    const addedField = {
+      id: Date.now(),
       [fieldName]: fieldValue,
-      label: labelValue,
-    }));
+      [fieldValue]: value,
+      label: fieldName !== "fieldLabel" ? labelValue : null,
+    };
+    dispatch(addAdditionalField(addedField));
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const fieldsWithLabel = {
-      ...addedFields,
-      label: addedFields.fieldLabel,
-    };
-    dispatch(addAdditionalField(fieldsWithLabel));
-    handleClose();
+    onClose();
   };
 
   return (
@@ -86,7 +61,7 @@ const AddFieldPopup = ({ onClose }) => {
         }}>
         <Typography variant="h6">Add a Field</Typography>
         <Typography
-          onClick={handleClose}
+          onClick={onClose}
           sx={{ cursor: "pointer" }}
           variant="h6">
           X
@@ -115,7 +90,6 @@ const AddFieldPopup = ({ onClose }) => {
               <InputLabel htmlFor="fieldType">Field Type</InputLabel>
               <Select
                 id="fieldType"
-                name="fieldType"
                 value={generalField.fieldType || ""}
                 onChange={(e) =>
                   handleAddField("fieldType", e.target.value)
@@ -140,81 +114,107 @@ const AddFieldPopup = ({ onClose }) => {
                 fullWidth
                 multiline
                 rows={2}
-                onClick={() =>
-                  handleAddField("fieldLabel", "Field Label")
+                onClick={(e) =>
+                  handleAddField(
+                    "fieldLabel",
+                    "Field Label",
+                    e.target.value
+                  )
                 }
               />
             </FormControl>
 
-            <Grid item xs={6}>
-              <FormControl sx={{ m: 1, width: "100%" }}>
-                <InputLabel>Variable Name</InputLabel>
-                <TextField
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={() =>
-                    handleAddField("fieldLabel", "Variable Name")
-                  }
-                />
-              </FormControl>
-            </Grid>
+            <FormControl sx={{ m: 1, width: "100%" }}>
+              <InputLabel htmlFor="variableName">
+                Variable Name
+              </InputLabel>
+              <TextField
+                id="variableName"
+                variant="outlined"
+                fullWidth
+                onClick={(e) =>
+                  handleAddField(
+                    "fieldLabel",
+                    "Variable Name",
+                    e.target.value
+                  )
+                }
+              />
+            </FormControl>
 
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "row",
+                gap: 1,
               }}>
-              <FormControl sx={{ m: 1, width: "100%" }}>
+              <FormControl sx={{ m: 1, flex: 1 }}>
                 <TextField
                   name="tooltip"
                   label="Tooltip"
                   variant="outlined"
                   fullWidth
-                  placeholder="Enter Tooltip"
-                  onClick={() =>
-                    handleAddField("fieldLabel", "Tooltip")
+                  onClick={(e) =>
+                    handleAddField(
+                      "fieldLabel",
+                      "Tooltip",
+                      e.target.value
+                    )
                   }
                 />
               </FormControl>
 
-              <FormControl sx={{ m: 1, width: "100%" }}>
+              <FormControl sx={{ m: 1, flex: 1 }}>
                 <TextField
                   name="helpText"
                   label="Help Text"
                   variant="outlined"
                   fullWidth
-                  onClick={() =>
-                    handleAddField("fieldLabel", "Help Text")
+                  onClick={(e) =>
+                    handleAddField(
+                      "fieldLabel",
+                      "Help Text",
+                      e.target.value
+                    )
                   }
                 />
               </FormControl>
             </Box>
+
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "row",
+                gap: 1,
               }}>
-              <FormControl sx={{ m: 1, width: "100%" }}>
+              <FormControl sx={{ m: 1, flex: 1 }}>
                 <TextField
                   name="placeholderText"
                   label="Placeholder Text"
                   variant="outlined"
                   fullWidth
-                  onClick={() =>
-                    handleAddField("fieldLabel", "Placeholder Text")
+                  onClick={(e) =>
+                    handleAddField(
+                      "fieldLabel",
+                      "Placeholder Text",
+                      e.target.value
+                    )
                   }
                 />
               </FormControl>
 
-              <FormControl sx={{ m: 1, width: "100%" }}>
+              <FormControl sx={{ m: 1, flex: 1 }}>
                 <TextField
                   name="customAlignment"
                   label="Custom Alignment"
                   variant="outlined"
                   fullWidth
-                  onClick={() =>
-                    handleAddField("fieldLabel", "Custom Alignment")
+                  onClick={(e) =>
+                    handleAddField(
+                      "fieldLabel",
+                      "Custom Alignment",
+                      e.target.value
+                    )
                   }
                 />
               </FormControl>
@@ -230,30 +230,36 @@ const AddFieldPopup = ({ onClose }) => {
                 label="Add Options"
                 variant="outlined"
                 fullWidth
-                onClick={() =>
-                  handleAddField("fieldLabel", "Add Options")
+                onClick={(e) =>
+                  handleAddField(
+                    "fieldLabel",
+                    "Add Options",
+                    e.target.value
+                  )
                 }
               />
             </FormControl>
+
             <Chip
               sx={{ backgroundColor: "primary.main", color: "white" }}
               label="Deletable"
-              onClick={() => {
-                handleAddField("chip1", "Deletable");
-              }}
+              onClick={(e) =>
+                handleAddField("chip1", "Deletable", e.target.value)
+              }
               onDelete={() => {}}
             />
 
             <Chip
               sx={{ backgroundColor: "primary.main", color: "white" }}
               label="Deletable"
-              onClick={() => {
-                handleAddField("chip2", "Deletable");
-              }}
+              onClick={(e) =>
+                handleAddField("chip2", "Deletable", e.target.value)
+              }
               onDelete={() => {}}
             />
           </Box>
         )}
+
         {tab === "Validation" && (
           <Box>
             <FormControl sx={{ m: 1, width: "100%" }}>
@@ -262,8 +268,7 @@ const AddFieldPopup = ({ onClose }) => {
               </InputLabel>
               <Select
                 labelId="date-format-label"
-                id="date-format"
-                value={addedFields.dateFormat || ""}
+                value={generalField.dateFormat || ""}
                 onChange={(e) =>
                   handleAddField("dateFormat", e.target.value)
                 }
@@ -288,7 +293,7 @@ const AddFieldPopup = ({ onClose }) => {
             marginTop: "auto",
           }}>
           <Button
-            onClick={handleClose}
+            onClick={onClose}
             sx={{ backgroundColor: "#F1F5F9", color: "#000" }}>
             Cancel
           </Button>
