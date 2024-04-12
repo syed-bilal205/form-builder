@@ -24,7 +24,7 @@ const Ecrf = () => {
         sx={{ color: "#0F172A", fontSize: 24, fontWeight: 600 }}>
         eCRF
       </Typography>
-      <Grid container spacing={2}>
+      <Grid container justifyContent="space-between" spacing={2}>
         <Grid item xs={12} md={6}>
           <TextField
             id="outlined-search"
@@ -56,17 +56,19 @@ const Ecrf = () => {
         <Grid
           item
           xs={12}
-          md={6}
+          md={2}
           sx={{
             display: {
               xs: "flex",
               marginTop: 1,
+              justifyContent: "end",
+              alignItems: "center",
             },
           }}>
           <Button
             variant="contained"
             onClick={handleCreateForm}
-            sx={{ padding: "6px 6px", width: "100%" }}>
+            sx={{ padding: "6px 6px" }}>
             New Form
           </Button>
         </Grid>
