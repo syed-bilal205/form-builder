@@ -1,23 +1,28 @@
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useState, useEffect } from "react";
-import { InputAdornment, Typography } from "@mui/material";
+import {
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  InputAdornment,
+  TextField,
+  Button,
+} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Search from "../assets/search.png";
+import FormDetails from "./FormDetails"; // Import the FormDetails component
 
 const Subjects = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState(null);
+  const [selectedSubjectId, setSelectedSubjectId] = useState(null); // State to store the selected subject ID
 
   const handleClick = () => {
     navigate("/form-builder");
@@ -43,6 +48,17 @@ const Subjects = () => {
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
   };
+
+  const handleSubjectClick = (event, subjectId) => {
+    const isSubjectIdCell = event.target.tagName === "A";
+    if (isSubjectIdCell) {
+      setSelectedSubjectId(subjectId);
+    }
+  };
+
+  if (selectedSubjectId) {
+    return <FormDetails id={selectedSubjectId} />;
+  }
 
   return (
     <div
@@ -72,9 +88,7 @@ const Subjects = () => {
                 <img src={Search} alt="" />
               </InputAdornment>
             ),
-            sx: {
-              backgroundColor: "#F1F5F9",
-            },
+            sx: { backgroundColor: "#F1F5F9" },
           }}
           InputLabelProps={{
             sx: {
@@ -97,10 +111,7 @@ const Subjects = () => {
         style={{ marginTop: "20px", borderRadius: "5px" }}>
         <Table aria-label="simple table">
           <TableHead
-            sx={{
-              backgroundColor: "#0E6ACE",
-              color: "white",
-            }}>
+            sx={{ backgroundColor: "#0E6ACE", color: "white" }}>
             <TableRow>
               <TableCell
                 align="center"
@@ -168,11 +179,20 @@ const Subjects = () => {
                   )
                 )
                 .map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow
+                    key={row.id}
+                    onClick={(event) =>
+                      handleSubjectClick(event, row.id)
+                    }
+                    style={{ cursor: "pointer" }}>
                     <TableCell
                       align="center"
                       sx={{ border: "1px solid #dddddd" }}>
-                      {row.id}
+                      <Link
+                        style={{ textDecoration: "none" }}
+                        to={`/subject/${row.id}`}>
+                        {row.id}
+                      </Link>
                     </TableCell>
                     <TableCell
                       align="center"

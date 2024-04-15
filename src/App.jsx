@@ -18,6 +18,7 @@ import BreadCrumbs from "./components/BreadCrumbs";
 import Logo from "./assets/Frame104.png";
 import Noti from "./assets/notification-alert.png";
 import Avatar from "./assets/Frame2399.png";
+import FormDetails from "./pages/FormDetails";
 
 const App = () => {
   return (
@@ -52,6 +53,7 @@ const App = () => {
               <Route path="/eCRF" element={<Ecrf />} />
               <Route path="/Form-Builder" element={<FormBuilder />} />
               <Route path="/Subjects" element={<Subjects />} />
+              <Route path="/subject/:id" element={<FormDetails />} />
             </Routes>
           </Box>
         </Container>
